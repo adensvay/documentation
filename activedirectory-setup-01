@@ -1,54 +1,209 @@
-# Lab 01 — Active Directory Domain Services Setup
+1. Windows Server Virtual Machine
 
-In depth tutorial from EastCharmer: https://youtu.be/GsmJowwIh8Q?si=VkQHgoOXbBjTZdtS
+I created a Windows Server virtual machine using VMware Workstation Pro.
 
-## Objective
+General setup:
 
-Build a basic Active Directory environment using a Windows Server virtual
-machine and establish an initial organizational structure for managing users,
-computers, servers, and groups.
+Download the Windows Server ISO
+Create a new virtual machine in VMware
+Attach the Windows Server ISO
+Allocate CPU, memory, and storage
+Install Windows Server
+Configure the local Administrator account
+Boot into Windows Server
 
-This lab covers:
+At this point, the server is a standalone Windows Server and is not yet a Domain Controller.
 
-- Creating a Windows Server virtual machine
-- Installing Active Directory Domain Services (AD DS)
-- Promoting the server to a Domain Controller
-- Creating an Organizational Unit (OU) hierarchy
-- Creating Active Directory groups
-- Understanding group scope and group type
-- Creating and organizing user accounts
+2. Install Active Directory Domain Services
 
----
+Active Directory Domain Services was installed through Server Manager.
 
-## Lab Environment
+Server Manager
+→ Add Roles and Features
+→ Active Directory Domain Services
 
-### Hypervisor
-VMware Workstation Pro
+AD DS provides centralized management of identities and resources within a Windows domain.
 
-### Server
-Windows Server running as a virtual machine
+Examples of Active Directory objects include:
 
-### Server Role
-Active Directory Domain Services (AD DS)
+Users
+Computers
+Servers
+Groups
+Organizational Units
+3. Promote the Server to a Domain Controller
 
-### Initial AD Structure
+Installing AD DS does not automatically make the server a Domain Controller.
 
-The environment is organized geographically using three primary OUs:
+After installing AD DS, I selected:
 
-```text
+Promote this server to a domain controller
+
+A new Active Directory forest and domain were then created.
+
+Domain Controller
+
+A Domain Controller runs Active Directory Domain Services and handles services such as domain authentication and directory management.
+
 Domain
-│
-├── USA
-│   ├── Users
-│   ├── Computers
-│   └── Servers
-│
-├── Europe
-│   ├── Users
-│   ├── Computers
-│   └── Servers
-│
-└── SEAsia
-    ├── Users
-    ├── Computers
-    └── Servers
+
+A domain contains directory objects such as users, computers, groups, and Organizational Units.
+
+Forest
+
+A forest is the highest level of an Active Directory environment. A forest can contain one or more domains.
+
+4. Organizational Units
+
+I created three primary Organizational Units based on geographic regions:
+
+USA
+Europe
+SEAsia
+
+Each regional OU contains:
+
+Users
+Computers
+Servers
+
+Example:
+
+USA
+├── Users
+├── Computers
+└── Servers
+
+Organizational Units provide a logical structure for Active Directory objects.
+
+OUs can be used to:
+
+Organize users and computers
+Apply Group Policy
+Delegate administrative responsibilities
+Separate resources by location or function
+5. Active Directory Groups
+
+Groups allow administrators to manage multiple users together instead of configuring permissions for every account individually.
+
+For example:
+
+User
+↓
+IT Security Group
+↓
+Resource Permission
+
+A user's access can then be managed through group membership.
+
+6. Group Scope
+
+Active Directory provides three main group scopes.
+
+Global
+
+Global groups are commonly used to organize users from the same domain based on their role.
+
+Example:
+
+IT
+Domain Local
+
+Domain Local groups are commonly used when assigning permissions to resources within a domain.
+
+Example:
+
+DL_ITAdmin
+Universal
+
+Universal groups can contain members from multiple domains within a forest.
+
+They become more useful in larger multi-domain environments.
+
+7. Group Type
+Security Groups
+
+Security groups can be used to assign permissions to resources.
+
+Examples include:
+
+Shared folders
+Applications
+Printers
+Administrative resources
+Distribution Groups
+
+Distribution groups are primarily used for email distribution.
+
+They are not used to assign security permissions.
+
+8. Creating Groups
+
+Groups are created through Active Directory Users and Computers.
+
+Active Directory Users and Computers
+→ Select OU
+→ New
+→ Group
+
+When creating a group, I configure:
+
+Group name
+Group scope
+Group type
+
+Users can then be added as members of the appropriate groups.
+
+9. Creating Users
+
+User accounts are created through Active Directory Users and Computers.
+
+Active Directory Users and Computers
+→ Users OU
+→ New
+→ User
+
+The account is configured with:
+
+Name
+Logon name
+Password
+Password settings
+Appropriate group membership
+
+The resulting account becomes an identity managed by Active Directory.
+
+Skills Practiced
+
+This stage of the lab gave me hands-on experience with:
+
+VMware Workstation
+Windows Server
+Active Directory Domain Services
+Domain Controller deployment
+Active Directory forests and domains
+Organizational Units
+User account creation
+Security and Distribution groups
+Global, Domain Local, and Universal group scopes
+Active Directory Users and Computers
+Next Steps
+
+Future stages of the lab will include:
+
+Windows client VM deployment
+Domain joining
+DNS
+Group Policy
+Permissions
+PowerShell automation
+Active Directory troubleshooting
+Reference
+
+This stage of the lab was built while following East Charmer's Active Directory home lab series:
+
+East Charmer, "Installing Active Directory on Windows Server on Virtual Machine (Home Lab) (Ep. 1)"
+
+YouTube: https://www.youtube.com/watch?v=GsmJowwIh8Q
+
+I used the tutorial as a learning resource while building and documenting the environment myself.
