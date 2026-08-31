@@ -1,0 +1,54 @@
+# Lab 01 — Active Directory Domain Services Setup
+
+In depth tutorial from EastCharmer: https://youtu.be/GsmJowwIh8Q?si=VkQHgoOXbBjTZdtS
+
+## Objective
+
+Build a basic Active Directory environment using a Windows Server virtual
+machine and establish an initial organizational structure for managing users,
+computers, servers, and groups.
+
+This lab covers:
+
+- Creating a Windows Server virtual machine
+- Installing Active Directory Domain Services (AD DS)
+- Promoting the server to a Domain Controller
+- Creating an Organizational Unit (OU) hierarchy
+- Creating Active Directory groups
+- Understanding group scope and group type
+- Creating and organizing user accounts
+
+---
+
+## Lab Environment
+
+### Hypervisor
+VMware Workstation Pro
+
+### Server
+Windows Server running as a virtual machine
+
+### Server Role
+Active Directory Domain Services (AD DS)
+
+### Initial AD Structure
+
+The environment is organized geographically using three primary OUs:
+
+```text
+Domain
+│
+├── USA
+│   ├── Users
+│   ├── Computers
+│   └── Servers
+│
+├── Europe
+│   ├── Users
+│   ├── Computers
+│   └── Servers
+│
+└── SEAsia
+    ├── Users
+    ├── Computers
+    └── Servers
