@@ -1,0 +1,146 @@
+[Setting Up Password Policy to Enforce Strong Passwords]
+
+
+Open up 'Group Policy Management' in Windows Administrative Tools in START
+>> Group Policy Management
+
+To create a new GPO:
+
+right click on forrest (e.g aden.local)
+>> 'Create a GPO in this domain, and Link it here...'
+Name it as you please, the more standard the better. 
+
+right click your GPO folder
+>> Edit
+
+Computer Config. >> Policies >> Windows Settings >> Security Settings >>
+Account Policies >> Password Policy
+
+= various custom policies for password enforcement
+
+
+
+
+
+
+
+[Drive Mapping]
+
+
+To create a new GPO:
+
+right click on forrest (e.g aden.local)
+>> 'Create a GPO in this domain, and Link it here...'
+Name it as you please, the more standard the better. 
+
+right click your GPO folder
+>> Edit
+
+User Config. >> Preferences >> Windows Settings >> Drive Maps >>
+>> (right click) 'New'
+
+= Drive Maps
+
+
+
+
+
+
+
+
+
+[Desktop Wallpaper Policy]
+
+
+To create a new GPO:
+
+right click on forrest (e.g aden.local)
+>> 'Create a GPO in this domain, and Link it here...'
+Name it as you please, the more standard the better. 
+
+right click your GPO folder
+>> Edit
+
+User Config >> Policies >> Administrative Templates >> Desktop >>
+>> Desktop (again) >> Desktop Wallpaper
+
+= you can then enable a set wallpaper across company devices, customize scale, and specific image
+
+
+
+
+
+
+
+
+
+[Restrict Access to Control Pannel]
+
+
+
+To create a new GPO:
+
+right click on forrest (e.g aden.local)
+>> 'Create a GPO in this domain, and Link it here...'
+Name it as you please, the more standard the better. 
+
+right click your GPO folder
+>> Edit
+
+
+User Config. >> Policies >> Administrative Templates >> Control Pannel >>
+>> Prohibit access to Control Pannel and PC Settings (change to enabled to activate)
+
+= users on that computer under the gpo will have no access to ctrl pannel
+
+
+
+
+
+
+
+
+
+
+[Disable USB Storage]
+
+
+To create a new GPO:
+
+right click on forrest (e.g aden.local)
+>> 'Create a GPO in this domain, and Link it here...'
+Name it as you please, the more standard the better. 
+
+right click your GPO folder
+>> Edit
+
+
+Computer Config. >> Policies >> Admin. Templates >> System >>
+>> Removable Storage Access >> Select and Enable 'All Removable Storage classes: Deny all access'
+= doing so ensures people cant stick floppy discs, cds, flashdrives to corrupt your computer. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
