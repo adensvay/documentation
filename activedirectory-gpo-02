@@ -91,8 +91,23 @@ right click your GPO folder
 User Config. >> Policies >> Administrative Templates >> Control Pannel >>
 >> Prohibit access to Control Pannel and PC Settings (change to enabled to activate)
 
-= users on that computer under the gpo will have no access to ctrl pannel
+***Updated accurate version of understanding after I locked myself out DC from my own GPO*** (09/02/2026)
+User Configuration → Policies → Administrative Templates
+→ Control Panel
+→ Prohibit access to Control Panel and PC Settings
+→ Enabled
 
+Purpose:
+Prevents user accounts within the scope of the GPO from accessing
+Control Panel and Windows Settings.
+
+Important:
+User Configuration policies follow the USER object, not simply the
+computer being used.
+
+Troubleshooting:
+Use `gpresult /r` to determine which GPOs are currently being applied
+to a user or computer.
 
 
 
