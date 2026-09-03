@@ -139,7 +139,16 @@ Computer Config. >> Policies >> Admin. Templates >> System >>
 
 
 
+** important note on linking, related to my previous lesson on locking myself out with a global gpo **
 
+GPO Scope and Linking
+
+A GPO is stored under Group Policy Objects, while the GPOs shown beneath domains or OUs are links to 
+that policy. Linking a GPO at the domain root gives it a very broad scope, while linking it to a 
+specific OU targets the users or computers within that OU. User Configuration policies apply based on 
+the user's location in AD, while Computer Configuration policies apply based on the computer object's 
+location. gpupdate /force forces policies to be reapplied immediately; it does not save changes. 
+gpresult /r can then be used to verify which GPOs are actually being applied.
 
 
 
