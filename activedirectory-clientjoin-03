@@ -1,1 +1,17 @@
+Joined client to DC
 
++ went into network properties and adapters in client
++ configured DNS of client to be set to IP and DNS 8.8.8.8 of the DC
++ used ping to test connection to the DC
++ used nslookup aden.local to see DNS resolution -> aden.local
+
+= pretty intuituve just need to cross reference the DC netstats using 'ipconfig /all'
+
+
+updated client computer to USA>>Computers (OU)
+- had a confusing mishap because I clicked 'move' but it did not properly route
+because I had not double clicked on the final path
++ solution to this was to back track, and verify where it was located (it was defaulted to root)
+
++ from the root, I moved it, made sure to double click this time
+**used powershell to trace where the comp01 (client) was located which saved alot of time
