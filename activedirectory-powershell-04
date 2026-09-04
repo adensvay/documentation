@@ -1,0 +1,4 @@
+
+Get-ADUser -Identity asvay - Server "aden.local" -Properties * 
+>> looks for a user in the forrest and returns all metadata associted with the user
+
