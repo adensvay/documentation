@@ -1,4 +1,27 @@
+[Viewing stats associated with a particular user]
 
-Get-ADUser -Identity asvay - Server "aden.local" -Properties * 
->> looks for a user in the forrest and returns all metadata associted with the user
+Get-ADUser -Identity asvay -Server "aden.local" -Properties * 
+>> it searches Active Directory for the user object with 
+identity asvay and returns the default attributes plus all additional available properties because of -Properties *.
+
+
+
+
+
+[Creating a new user]
+
+New-ADUser `
+    -Name "John Smith" `
+    -GivenName "John" `
+    -Surname "Smith" `
+    -SamAccountName "jsmith" `
+    -UserPrincipalName "jsmith@aden.local" `
+    -Path "OU=Users,OU=USA,DC=aden,DC=local" `
+    -AccountPassword (ConvertTo-SecureString 'TempLab!2026#User' -AsPlainText -Force) `
+    -Enabled $true `
+    -ChangePasswordAtLogon $true
+
+
+
+
 
