@@ -8,5 +8,5 @@ Current areas of focus include Active Directory, Windows Server,
 PowerShell, virtualization, Docker, and networking.
 
 
-# Featured Project: Active Directory Lab Topology
+# Featured Project: Active Directory Lab Topology Diagram
 ![Active Directory Topology](https://github.com/adensvay/documentation/blob/main/ActiveDirectoryTopology.png?raw=true)
