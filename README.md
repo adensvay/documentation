@@ -1,6 +1,12 @@
-documentation
+# Technical Documentation
 
-hi. heres a running repository of everything I know and am working on. So far just updates on my projects.
+A running collection of my notes, labs, configurations, troubleshooting,
+and technical documentation as I work across systems administration,
+networking, cloud, and infrastructure projects.
+
+Current areas of focus include Active Directory, Windows Server,
+PowerShell, virtualization, Docker, and networking.
+
 
 # Active Directory Lab Topology
 ![Active Directory Topology](https://github.com/adensvay/documentation/blob/main/ActiveDirectoryTopology.png?raw=true)
