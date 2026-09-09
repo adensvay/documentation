@@ -1,25 +1,78 @@
+[Determining powershell version number]
+    $PSVersionTable
+
+
 [Viewing stats associated with a particular user]
+    Get-ADUser -Identity asvay -Server "aden.local" -Properties * 
+    >> it searches Active Directory for the user object with 
+    identity asvay and returns the default attributes plus all additional available properties because of -Properties *.
 
-Get-ADUser -Identity asvay -Server "aden.local" -Properties * 
->> it searches Active Directory for the user object with 
-identity asvay and returns the default attributes plus all additional available properties because of -Properties *.
 
 
+[Common usages in UNIX]
+Change directory >>	Set-Location >>	cd
+List directory contents	>> Get-ChildItem >>	ls
+Current directory >> Get-Location >> pwd
+Go up one directory >> Set-Location >>	cd
+Clear terminal >> Clear-Host >> clear / cls
+
+pt.2
+
+[Create directory]
+New-Item -ItemType Directory -Name "TestFolder"
+
+[Create file]
+New-Item -ItemType File -Name "test.txt"
+
+[Read a text file]
+Get-Content .\test.txt
+
+[Copy something]
+Copy-Item .\test.txt .\Backup\
+
+[Move/rename]
+Move-Item .\test.txt .\TestFolder\
+
+[Delete]
+Remove-Item .\test.txt
+
+[Find commands]
+Get-Command *ADUser*
+
+[Learn how a command works]
+Get-Help Get-ADUser -Examples
 
 
 
 [Creating a new user]
+    New-ADUser `
+        -Name "John Smith" `
+        -GivenName "John" `
+        -Surname "Smith" `
+        -SamAccountName "jsmith" `
+        -UserPrincipalName "jsmith@aden.local" `
+        -Path "OU=Users,OU=USA,DC=aden,DC=local" `
+        -AccountPassword (ConvertTo-SecureString 'TempLab!2026#User' -AsPlainText -Force) `
+        -Enabled $true `
+        -ChangePasswordAtLogon $true
 
-New-ADUser `
-    -Name "John Smith" `
-    -GivenName "John" `
-    -Surname "Smith" `
-    -SamAccountName "jsmith" `
-    -UserPrincipalName "jsmith@aden.local" `
-    -Path "OU=Users,OU=USA,DC=aden,DC=local" `
-    -AccountPassword (ConvertTo-SecureString 'TempLab!2026#User' -AsPlainText -Force) `
-    -Enabled $true `
-    -ChangePasswordAtLogon $true
+
+[Reset Password as Admin]
+Set-ADAccountPassword -Identity asvay -Reset -NewPassword (ConvertTo-SecureString "TempPassword123!" -AsPlainText -Force)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
