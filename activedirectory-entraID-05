@@ -1,0 +1,17 @@
+I feel like this should be apart of its own directory folder in github, but we can reorganize later. 
+
+[EntraID]
+
+So far we have created a MS Azure account* note that they need a credit card on file + schoolsfirst credit union has 
+some kind of issues, so using an alternative card worked better. 
+
+- I have created two test users in entraID
+- coppied their upn domain suffix (after the @)
+
+then to encode this route this locally:
+
+- go into trusts and domains in AD controller
+- add a new upn (make sure to click on the global setting and not individual forrest
+- then you need to got to users and computers and change original domain to new upn from dropdown on logon settings. 
+
+*next step is configuring entraconnect*
