@@ -15,3 +15,13 @@ then to encode this route this locally:
 - then you need to got to users and computers and change original domain to new upn from dropdown on logon settings. 
 
 *next step is configuring entraconnect*
+
+* managed to set up entra connect >> all userss from AD lab have synced into azure
+
+[Entra Connect]
+
+follow steps and documentation for download.
+
+create a new promoted global admin in entraID
+sign in with that email/user upon download of entra connect
+configure MFA on phone
