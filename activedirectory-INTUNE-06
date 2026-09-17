@@ -1,0 +1,10 @@
+sept17th, 2026
+
+- intune was already apart of the package in entra/azure
+- had to buy a p1 license (30day trial>>$8per month after)
+- very easy signup
+- assigning users was easy too everything is native, and just select (assign)
+- common error: if there is a scope issue or not in the right 'location', this means
+you have to go into entra and change settings so that the 'usage location' is within the US
+
+*tackling part2 next session >> actually going deeper and joining windows 11 client and implementing rules and configurations
