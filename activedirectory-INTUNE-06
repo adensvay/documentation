@@ -8,3 +8,221 @@ sept17th, 2026
 you have to go into entra and change settings so that the 'usage location' is within the US
 
 *tackling part2 next session >> actually going deeper and joining windows 11 client and implementing rules and configurations
+
+
+## Microsoft Intune — Windows 11 MDM Enrollment 
+09212026
+### Objective
+
+Extend the existing `aden.local` Active Directory / Microsoft Entra ID lab by enrolling a domain-joined Windows 11 Enterprise workstation into Microsoft Intune for MDM management.
+
+### Architecture
+
+```text
+Windows Server 2022
+Active Directory (aden.local)
+        │
+        │ Entra Connect
+        ▼
+Microsoft Entra ID
+        │
+        ▼
+Microsoft Intune
+        │
+        │ MDM
+        ▼
+Windows 11 Enterprise
+```
+
+### 1. Troubleshoot Group Policy
+
+Windows Settings was inaccessible due to an existing `Restrict Control Panel` GPO.
+
+Identify applied policies:
+
+```cmd
+gpresult /r
+```
+
+After removing the restrictive GPO, refresh policy on the Windows 11 client:
+
+```cmd
+gpupdate /force
+```
+
+Verified that Windows Settings was accessible after the policy refresh.
+
+### 2. Create a Dedicated Admin Account
+
+Created a separate administrative account in Active Directory:
+
+```text
+ADEN\svadmin
+```
+
+Rather than granting administrative privileges to the normal user account, `svadmin` is used for workstation administration.
+
+Added the account to the Windows 11 client's local Administrators group:
+
+```cmd
+net localgroup Administrators "ADEN\svadmin" /add
+```
+
+Verify membership:
+
+```cmd
+net localgroup Administrators
+```
+
+Verify current logged-in identity:
+
+```cmd
+whoami
+```
+
+This provides workstation administrative privileges without granting Domain Admin permissions.
+
+### 3. Configure an Intune Test User
+
+Used a standard AD user representing an employee:
+
+```text
+ADEN\jsmith
+```
+
+The account was synchronized into Microsoft Entra ID through Entra Connect:
+
+```text
+ADEN\jsmith
+      │
+      │ Entra Connect
+      ▼
+jsmith@<tenant>.onmicrosoft.com
+```
+
+Assigned the synchronized user a **Microsoft Intune Plan 1** license through the Microsoft 365 Admin Center.
+
+### 4. Enroll Windows 11 into Intune
+
+Logged into the Windows 11 workstation using:
+
+```text
+ADEN\svadmin
+```
+
+Navigated to:
+
+```text
+Settings
+→ Accounts
+→ Access work or school
+→ Enroll only in device management
+```
+
+Authenticated using the Intune-licensed employee account:
+
+```text
+jsmith@<tenant>.onmicrosoft.com
+```
+
+### 5. Verify MDM Enrollment
+
+Windows successfully reported:
+
+```text
+Connected by jsmith@<tenant>.onmicrosoft.com
+Connected to Default Directory MDM
+Managed by Default Directory
+```
+
+The workstation simultaneously remained joined to:
+
+```text
+aden.local
+```
+
+Final architecture:
+
+```text
+             Microsoft Entra ID
+                    │
+              Microsoft Intune
+                    │
+                   MDM
+                    │
+                    ▼
+             Windows 11 Client
+                    ▲
+                    │
+              Domain Joined
+                    │
+               aden.local
+                    │
+           Windows Server 2022
+```
+
+### Troubleshooting Commands
+
+Check applied Group Policy:
+
+```cmd
+gpresult /r
+```
+
+Generate detailed Group Policy report:
+
+```cmd
+gpresult /h C:\gp-report.html
+```
+
+Force Group Policy refresh:
+
+```cmd
+gpupdate /force
+```
+
+Verify domain user:
+
+```cmd
+net user jsmith /domain
+```
+
+Add domain admin account to local Administrators:
+
+```cmd
+net localgroup Administrators "ADEN\svadmin" /add
+```
+
+View local administrators:
+
+```cmd
+net localgroup Administrators
+```
+
+Check current identity:
+
+```cmd
+whoami
+```
+
+Check Entra/device registration status:
+
+```cmd
+dsregcmd /status
+```
+
+### Current Status
+
+- [x] Windows Server 2022 Active Directory
+- [x] Windows 11 domain joined
+- [x] AD → Entra ID synchronization
+- [x] Separate workstation administrator account
+- [x] Intune Plan 1 user licensing
+- [x] Windows 11 MDM enrollment
+- [ ] Verify endpoint in Intune Admin Center
+- [ ] Create Intune device/user groups
+- [ ] Deploy configuration profiles
+- [ ] Configure compliance policies
+- [ ] Deploy applications
+- [ ] Configure endpoint security policies
+- [ ] Explore Conditional Access
