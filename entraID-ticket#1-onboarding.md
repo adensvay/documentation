@@ -34,7 +34,7 @@ IT received a request to:
 This scenario uses a **cloud-native Entra ID identity** and does not depend on the on-premises Active Directory environment.
 
 
-![Entra ID User Onboarding](images/entra-user-onboarding.png)
+![Maya Chen Entra ID Sign-In](Screenshot%202026-09-28%20122638.png)
 
 
 ---
