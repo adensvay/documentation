@@ -33,6 +33,10 @@ IT received a request to:
 
 This scenario uses a **cloud-native Entra ID identity** and does not depend on the on-premises Active Directory environment.
 
+
+![Entra ID User Onboarding](images/entra-user-onboarding.png)
+
+
 ---
 
 ## 1. Create the User
