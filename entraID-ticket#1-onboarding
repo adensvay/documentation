@@ -1,0 +1,187 @@
+# Scenario #1 — Entra ID User Onboarding
+
+## Objective
+
+Simulate the onboarding of a new employee into a cloud-based Microsoft environment using Microsoft Entra ID.
+
+The goal was to provision the employee's identity, assign appropriate department-based access, require a password change during initial authentication, and verify that the account could successfully authenticate.
+
+---
+
+## Scenario
+
+A new employee, **Maya Chen**, has joined the Sales department.
+
+IT received a request to:
+
+- Create Maya's company identity.
+- Assign her to the appropriate Sales security group.
+- Provide temporary credentials.
+- Require a password change during her first sign-in.
+- Verify that the account can successfully authenticate.
+- Confirm the authentication event through Entra ID sign-in logs.
+
+---
+
+## Environment
+
+- Microsoft Entra ID
+- Microsoft Entra Admin Center
+- Cloud-native user account
+- Entra security groups
+- Entra sign-in logs
+
+This scenario uses a **cloud-native Entra ID identity** and does not depend on the on-premises Active Directory environment.
+
+---
+
+## 1. Create the User
+
+Navigate to:
+
+**Microsoft Entra Admin Center → Entra ID → Users → All Users → New User → Create New User**
+
+Create the employee account using the organization's naming convention.
+
+Example configuration:
+
+```text
+Display Name: Maya Chen
+User Principal Name: maya.chen@<tenant>.onmicrosoft.com
+First Name: Maya
+Last Name: Chen
+Job Title: Sales Representative
+Department: Sales
+User Type: Member
+Account Status: Enabled
+```
+
+A temporary password was generated for the employee with a password change required during initial sign-in.
+
+---
+
+## 2. Assign Department Group Membership
+
+Navigate to:
+
+**Entra ID → Groups → All Groups**
+
+Create or locate the appropriate Sales security group.
+
+Example:
+
+```text
+Group Type: Security
+Group Name: SG-Sales
+Membership Type: Assigned
+```
+
+Add **Maya Chen** as a member of `SG-Sales`.
+
+Using group-based access allows permissions and resources to be assigned according to job function rather than individually managing access for every employee.
+
+---
+
+## 3. Test Initial Authentication
+
+Open a private/incognito browser session to avoid using an existing administrator session.
+
+Navigate to the Microsoft 365 sign-in portal and authenticate using Maya's:
+
+```text
+User Principal Name
++
+Temporary Password
+```
+
+Complete the required password change during the initial login.
+
+This verifies that:
+
+- The Entra identity exists.
+- The account is enabled.
+- The supplied credentials are valid.
+- The user can successfully authenticate against the tenant.
+
+---
+
+## 4. Verify Authentication in Entra ID
+
+Return to the administrator account and navigate to:
+
+**Entra ID → Monitoring & Health → Sign-in Logs**
+
+Locate Maya's authentication event.
+
+Review information including:
+
+```text
+User
+Application
+Sign-in status
+IP address
+Authentication details
+Device information
+Conditional Access
+Timestamp
+```
+
+Confirm that the authentication attempt completed successfully.
+
+---
+
+## 5. Validate Provisioning
+
+Verify the following before considering onboarding complete:
+
+```text
+[✓] User identity created
+[✓] Correct User Principal Name assigned
+[✓] Account enabled
+[✓] Employee attributes populated
+[✓] Sales security group assigned
+[✓] Temporary credentials provided
+[✓] Password changed during initial sign-in
+[✓] Successful authentication confirmed
+[✓] Authentication visible in Entra sign-in logs
+```
+
+---
+
+## Result
+
+Maya Chen was successfully provisioned as a cloud-native Microsoft Entra ID user and assigned to the Sales security group.
+
+The account successfully completed its initial authentication and password change, and the successful sign-in was confirmed through Entra ID monitoring.
+
+At this stage, Maya has a functional organizational identity but has **not yet been provisioned with the full Microsoft 365 application and service stack**. Microsoft 365 licensing and service provisioning will be handled separately.
+
+---
+
+## Key Takeaways
+
+This scenario demonstrated the basic identity lifecycle involved in onboarding a new employee into a Microsoft cloud environment:
+
+```text
+Onboarding Request
+        ↓
+Create Entra Identity
+        ↓
+Configure User Attributes
+        ↓
+Assign Security Groups
+        ↓
+Issue Temporary Credentials
+        ↓
+Initial Authentication
+        ↓
+Password Change
+        ↓
+Review Sign-in Logs
+        ↓
+Validate / Close Request
+```
+
+The exercise also reinforced the distinction between **identity provisioning** and **service provisioning**.
+
+Creating an Entra ID account establishes the user's organizational identity and ability to authenticate. Access to services such as Exchange Online, Teams, OneDrive, and other Microsoft 365 applications requires additional licensing and configuration.
