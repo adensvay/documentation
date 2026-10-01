@@ -1,0 +1,973 @@
+# Hybrid Microsoft Entra Join & Intune Troubleshooting Lab
+
+## Overview
+
+This lab focused on troubleshooting identity, compliance, device management, and Hybrid Microsoft Entra Join across a Windows enterprise environment.
+
+Technologies used:
+
+- Windows Server Active Directory
+- Windows 11
+- Microsoft Entra ID
+- Microsoft Entra Connect Sync
+- Microsoft Intune
+- PowerShell
+- Windows Task Scheduler
+
+The lab began with an Intune compliance issue and eventually uncovered an important distinction between:
+
+- User identity
+- Device identity
+- Active Directory domain membership
+- Microsoft Entra device registration
+- Intune device management
+
+By the end of the lab, the Windows 11 client `COMP01` was successfully configured as a **Hybrid Microsoft Entra joined device** while remaining joined to the on-premises Active Directory domain and managed through Microsoft Intune.
+
+---
+
+# Lab Architecture
+
+The environment consists of an on-premises Active Directory domain connected to Microsoft Entra ID through Microsoft Entra Connect.
+
+```text
+On-Premises Active Directory
+aden.local
+│
+├── Users
+│   └── jsmith
+│
+└── Computers
+    └── COMP01
+         │
+         ├──── Domain Join ──────────────► Active Directory
+         │
+         ├──── Hybrid Entra Join ────────► Microsoft Entra ID
+         │
+         └──── MDM Enrollment ───────────► Microsoft Intune
+```
+
+Microsoft Entra Connect provides synchronization between the on-premises Active Directory environment and Microsoft Entra ID.
+
+---
+
+# Part 1 - Intune Compliance Troubleshooting
+
+## Initial Problem
+
+`COMP01` was successfully enrolled in Intune and receiving configuration policies.
+
+However, its compliance information displayed:
+
+```text
+Has a compliance policy assigned
+State: Error
+Error: 65001 (Not applicable)
+```
+
+Other checks showed:
+
+```text
+Is active: Compliant
+Enrolled user exists: Compliant
+```
+
+This suggested that the device itself was successfully enrolled and communicating with Intune.
+
+---
+
+## Investigating the Compliance Assignment
+
+The existing compliance policy was assigned to:
+
+```text
+SG-IT
+```
+
+However, the test user `jsmith` belonged to:
+
+```text
+SG-Sales
+```
+
+Therefore, the compliance policy was not applicable to the user's assignment scope.
+
+A new Windows compliance policy was created:
+
+```text
+LAB - Windows Baseline Compliance
+```
+
+It was assigned to:
+
+```text
+Included Group: SG-Sales
+```
+
+Example compliance requirements included:
+
+- Windows Firewall required
+- Antivirus required
+- Antispyware required
+- Additional Windows security requirements appropriate for the VM
+
+---
+
+## Synchronizing the Device
+
+The Windows 11 device was synchronized with Intune.
+
+An important distinction learned during this process:
+
+> Intune Sync operates on the managed device. Individual configuration, compliance, or application policies are not manually synchronized one at a time.
+
+After the device checked in again, `COMP01` successfully received and evaluated the new compliance policy.
+
+Result:
+
+```text
+COMP01: Compliant
+65001 error: Resolved
+```
+
+This demonstrated that the original issue was related to **policy targeting**, not a broken Intune enrollment.
+
+---
+
+# Part 2 - Users and Devices Are Separate Objects
+
+One of the most important concepts from this lab was separating **user identity** from **device identity**.
+
+For example:
+
+```text
+jsmith = USER
+COMP01 = DEVICE
+```
+
+These are separate directory objects.
+
+A single managed computer may also have multiple users over its lifetime.
+
+```text
+                 COMP01
+              Windows 11 PC
+                   │
+          ┌────────┼────────┐
+          ▼        ▼        ▼
+       jsmith    User2    Admin
+```
+
+Intune can apply settings based on either users or devices.
+
+Examples of device-related management:
+
+```text
+COMP01 must have Windows Firewall enabled.
+COMP01 must receive a configuration profile.
+COMP01 must install a required application.
+```
+
+Examples of user-related management:
+
+```text
+jsmith belongs to SG-Sales.
+jsmith receives applications assigned to SG-Sales.
+jsmith receives user-targeted policies.
+```
+
+A user being associated with an Intune device does **not** mean the user and device are the same object.
+
+---
+
+# Part 3 - Intune Enrollment vs Microsoft Entra Join
+
+Another major concept learned was that:
+
+> Intune enrollment is not the same thing as Microsoft Entra Join.
+
+A Windows device can be managed by Intune without being Microsoft Entra joined.
+
+Before troubleshooting Hybrid Join, `COMP01` could already:
+
+- Communicate with Intune
+- Receive configuration profiles
+- Receive compliance policies
+- Perform Intune Sync
+- Report device information
+- Appear as a managed endpoint
+
+However:
+
+```powershell
+dsregcmd /status
+```
+
+returned:
+
+```text
+AzureAdJoined    : NO
+EnterpriseJoined : NO
+DomainJoined     : YES
+DomainName       : ADEN
+Device Name      : comp01.aden.local
+```
+
+Therefore:
+
+```text
+Active Directory Domain Join    ✅
+Intune Management               ✅
+Microsoft Entra Device Join     ❌
+```
+
+This explained why Intune management could work even though the device itself did not yet have a Hybrid Microsoft Entra identity.
+
+---
+
+# Part 4 - Investigating the jsmith Identity
+
+The test user was inspected on the domain controller using PowerShell:
+
+```powershell
+Get-ADUser jsmith -Properties UserPrincipalName |
+Select Name,SamAccountName,UserPrincipalName
+```
+
+The output confirmed that `jsmith` existed in Active Directory.
+
+The Active Directory UPN suffix configuration was also inspected:
+
+```powershell
+Get-ADForest | Select -ExpandProperty UPNSuffixes
+```
+
+The user was then inspected in Microsoft Entra ID.
+
+Microsoft Entra showed:
+
+```text
+On-premises sync enabled: Yes
+```
+
+This established that `jsmith` was already a synchronized hybrid identity.
+
+Conceptually:
+
+```text
+Active Directory
+jsmith
+   │
+   │ Microsoft Entra Connect
+   ▼
+Microsoft Entra ID
+jsmith
+```
+
+The Active Directory and Microsoft Entra representations belong to the same synchronized identity.
+
+---
+
+# Part 5 - Verifying Microsoft Entra Connect
+
+Microsoft Entra Connect Sync was inspected using:
+
+```text
+Synchronization Service Manager
+```
+
+The Operations page showed successful synchronization operations for both the Active Directory and Microsoft Entra connectors.
+
+Examples included:
+
+```text
+Delta Import              Success
+Delta Synchronization     Success
+Export                    Success
+```
+
+This established that Microsoft Entra Connect itself was functioning correctly.
+
+Instead of assuming synchronization was broken, the troubleshooting process showed that the problem existed specifically with **device registration**.
+
+---
+
+# Part 6 - Diagnosing COMP01 Device Identity
+
+The Windows 11 client was inspected using:
+
+```powershell
+dsregcmd /status
+```
+
+Initial device state:
+
+```text
+AzureAdJoined    : NO
+EnterpriseJoined : NO
+DomainJoined     : YES
+DomainName       : ADEN
+Device Name      : comp01.aden.local
+```
+
+This established that `COMP01` was a traditional Active Directory domain-joined Windows computer.
+
+It was not yet Hybrid Microsoft Entra joined.
+
+The architecture at this point was approximately:
+
+```text
+                 Microsoft Entra ID
+                        ▲
+                        │
+                 Entra Connect
+                        │
+                        │
+Active Directory       │
+aden.local              │
+│                       │
+├── jsmith ─────────────┘
+│      User Sync ✅
+│
+└── COMP01
+     │
+     ├── Domain Joined ✅
+     │
+     ├── Intune Managed ✅
+     │
+     └── Entra Joined ❌
+```
+
+---
+
+# Part 7 - Configuring Hybrid Microsoft Entra Join
+
+Microsoft Entra Connect Sync was opened on the server.
+
+The following configuration path was used:
+
+```text
+Microsoft Entra Connect Sync
+        ↓
+Configure
+        ↓
+Configure device options
+        ↓
+Configure Hybrid Microsoft Entra ID join
+```
+
+For supported operating systems, the following option was selected:
+
+```text
+Windows 10 or later domain-joined devices
+```
+
+Windows 11 is included in this category.
+
+---
+
+# Part 8 - Configuring the Service Connection Point
+
+The next step was configuring the **Service Connection Point (SCP)**.
+
+The Active Directory forest selected was:
+
+```text
+aden.local
+```
+
+The authentication service was configured for Microsoft Entra ID.
+
+On-premises Active Directory Enterprise Administrator credentials were used to authorize the SCP configuration.
+
+This demonstrated another important distinction:
+
+```text
+Microsoft Entra Administrator
+        │
+        └── Manages cloud identity / Entra
+
+Active Directory Enterprise Administrator
+        │
+        └── Manages the on-premises AD forest
+```
+
+Both administrative environments participate in Hybrid Microsoft Entra Join.
+
+---
+
+# What the SCP Does
+
+The Service Connection Point allows domain-joined Windows computers to discover which Microsoft Entra tenant they should register with.
+
+Conceptually:
+
+```text
+COMP01
+   │
+   │ "Which Entra tenant belongs to this domain?"
+   ▼
+Active Directory SCP
+   │
+   │ Tenant information
+   ▼
+Microsoft Entra ID
+```
+
+Microsoft Entra Connect successfully completed the configuration.
+
+The wizard reported:
+
+```text
+Configuration complete
+
+The task to configure Hybrid Microsoft Entra ID join
+completed successfully.
+```
+
+---
+
+# Part 9 - Device Registration Did Not Happen Immediately
+
+After configuring Hybrid Microsoft Entra Join, the Windows 11 machine was checked again:
+
+```powershell
+dsregcmd /status
+```
+
+It still returned:
+
+```text
+AzureAdJoined : NO
+DomainJoined  : YES
+```
+
+This demonstrated that configuring the infrastructure does not necessarily cause the endpoint to register instantly.
+
+The next troubleshooting step was to investigate the Windows device registration process.
+
+---
+
+# Part 10 - Windows Automatic Device Join
+
+Windows Task Scheduler was opened on `COMP01`.
+
+The following path was inspected:
+
+```text
+Task Scheduler Library
+    ↓
+Microsoft
+    ↓
+Windows
+    ↓
+Workplace Join
+```
+
+Inside the folder was:
+
+```text
+Automatic-Device-Join
+```
+
+This scheduled task participates in automatic device registration.
+
+The task was manually triggered to initiate another device registration attempt.
+
+This was an important troubleshooting lesson:
+
+> Configuring the server-side infrastructure and executing the endpoint-side registration process are separate steps.
+
+---
+
+# Part 11 - Successful Hybrid Microsoft Entra Join
+
+After triggering `Automatic-Device-Join`, the device state was checked again:
+
+```powershell
+dsregcmd /status
+```
+
+The result changed to:
+
+```text
+AzureAdJoined    : YES
+EnterpriseJoined : NO
+DomainJoined     : YES
+DomainName       : ADEN
+Device Name      : comp01.aden.local
+```
+
+Additional information showed:
+
+```text
+DeviceAuthStatus : SUCCESS
+TpmProtected     : YES
+```
+
+The important combination was:
+
+```text
+AzureAdJoined : YES
+DomainJoined  : YES
+```
+
+This confirmed that `COMP01` was successfully:
+
+# Hybrid Microsoft Entra Joined
+
+---
+
+# Final Architecture
+
+The completed architecture now looks approximately like:
+
+```text
+                         MICROSOFT CLOUD
+
+                ┌──────────────────────────┐
+                │    Microsoft Entra ID    │
+                │                          │
+                │   Users        Devices   │
+                │   jsmith        COMP01   │
+                └──────▲────────────▲──────┘
+                       │            │
+             User Sync │            │ Hybrid Join
+                       │            │
+                ┌──────┴────────────┴──────┐
+                │ Microsoft Entra Connect  │
+                └────────────▲─────────────┘
+                             │
+                             │
+                    ON-PREMISES NETWORK
+
+                ┌────────────┴─────────────┐
+                │     Active Directory     │
+                │        aden.local        │
+                │                          │
+                │  jsmith          COMP01  │
+                └──────────────────────────┘
+
+
+                            COMP01
+                               │
+                               │ MDM
+                               ▼
+                      Microsoft Intune
+                               │
+                 ┌─────────────┼─────────────┐
+                 │             │             │
+                 ▼             ▼             ▼
+            Compliance    Configuration     Apps
+             Policies       Profiles
+```
+
+---
+
+# Troubleshooting Workflow
+
+Instead of randomly changing settings, the problem was isolated layer by layer.
+
+```text
+Intune enrollment
+        │
+        ▼
+Verify device communication
+        │
+        ▼
+Inspect compliance assignment
+        │
+        ▼
+Correct group targeting
+        │
+        ▼
+Verify AD user
+        │
+        ▼
+Verify Entra user synchronization
+        │
+        ▼
+Verify Entra Connect synchronization
+        │
+        ▼
+Inspect device join state
+        │
+        ▼
+Configure Hybrid Entra Join
+        │
+        ▼
+Configure SCP
+        │
+        ▼
+Trigger Automatic-Device-Join
+        │
+        ▼
+Verify with dsregcmd
+```
+
+Final verification:
+
+```text
+AzureAdJoined    : YES
+DomainJoined     : YES
+DeviceAuthStatus : SUCCESS
+```
+
+---
+
+# Important Commands
+
+## Check Microsoft Entra / Domain Join Status
+
+```powershell
+dsregcmd /status
+```
+
+Important fields:
+
+```text
+AzureAdJoined
+EnterpriseJoined
+DomainJoined
+DomainName
+DeviceAuthStatus
+```
+
+---
+
+## Inspect an Active Directory User
+
+```powershell
+Get-ADUser jsmith -Properties UserPrincipalName |
+Select Name,SamAccountName,UserPrincipalName
+```
+
+---
+
+## Inspect Configured AD UPN Suffixes
+
+```powershell
+Get-ADForest | Select -ExpandProperty UPNSuffixes
+```
+
+---
+
+# Key Concepts Learned
+
+## 1. Users and Devices Are Separate Directory Objects
+
+```text
+jsmith = user identity
+COMP01 = device identity
+```
+
+Synchronizing a user into Microsoft Entra does not automatically establish the Microsoft Entra identity of their computer.
+
+---
+
+## 2. Intune Enrollment Is Not Microsoft Entra Join
+
+A computer can be:
+
+```text
+Domain Joined      ✅
+Intune Managed     ✅
+Entra Joined       ❌
+```
+
+Intune provides endpoint management.
+
+Microsoft Entra provides cloud identity and device identity.
+
+They integrate closely but perform different functions.
+
+---
+
+## 3. Hybrid Join Gives the Device Two Identity Relationships
+
+A Hybrid Microsoft Entra joined computer has:
+
+```text
+On-premises Active Directory identity
++
+Microsoft Entra device identity
+```
+
+Verification:
+
+```text
+DomainJoined  : YES
+AzureAdJoined : YES
+```
+
+---
+
+## 4. Microsoft Entra Connect Performs Multiple Functions
+
+Entra Connect can participate in:
+
+- User synchronization
+- Group synchronization
+- Directory synchronization
+- Hybrid identity configuration
+- Hybrid device join configuration
+
+A healthy user synchronization process does not automatically prove that a device has completed Hybrid Join.
+
+---
+
+## 5. The SCP Enables Tenant Discovery
+
+The Service Connection Point tells Active Directory domain-joined Windows computers which Microsoft Entra tenant they should use for registration.
+
+```text
+AD Device
+   ↓
+SCP
+   ↓
+Entra Tenant
+```
+
+---
+
+## 6. Windows Task Scheduler Participates in Device Registration
+
+The following scheduled task participates in automatic device registration:
+
+```text
+Microsoft
+└── Windows
+    └── Workplace Join
+        └── Automatic-Device-Join
+```
+
+Manually triggering this task helped complete the registration of `COMP01`.
+
+---
+
+## 7. Configuration and Compliance Policies Are Different
+
+Configuration policies answer:
+
+> How should this device be configured?
+
+Compliance policies answer:
+
+> Does this device meet organizational requirements?
+
+For example:
+
+```text
+Configuration:
+Enable/configure a Windows security setting
+
+Compliance:
+Check whether the required security condition exists
+```
+
+---
+
+## 8. Intune Assignments Require Correct Targeting
+
+Policies and applications can be targeted to:
+
+```text
+Users
+or
+Devices
+```
+
+A policy assigned to `SG-IT` does not automatically apply to a user in `SG-Sales`.
+
+Before troubleshooting the endpoint itself, verify:
+
+```text
+User/device
+    ↓
+Group membership
+    ↓
+Policy assignment
+    ↓
+Applicability
+```
+
+---
+
+## 9. "Not Applicable" Is Different From "Failed"
+
+An Intune status of:
+
+```text
+Not Applicable
+```
+
+does not necessarily mean the endpoint is broken.
+
+It can indicate that the policy/application does not apply to the current:
+
+- User
+- Device
+- Group assignment
+- Platform
+- Installation context
+
+This should be investigated before changing endpoint configuration.
+
+---
+
+## 10. Troubleshoot by Following the System
+
+A major takeaway from this lab was to avoid randomly changing settings.
+
+The more useful workflow was:
+
+```text
+Observe symptom
+      ↓
+Determine affected layer
+      ↓
+Verify current state
+      ↓
+Check targeting/configuration
+      ↓
+Check logs/status
+      ↓
+Make one change
+      ↓
+Verify result
+```
+
+This made it possible to determine that:
+
+- Intune enrollment was working.
+- Compliance targeting was initially incorrect.
+- The AD user existed.
+- User synchronization was working.
+- Entra Connect was healthy.
+- COMP01 was domain joined.
+- COMP01 had not completed Hybrid Entra Join.
+- The SCP needed to be configured.
+- Automatic device registration needed to occur.
+
+---
+
+# Troubleshooting Result
+
+## Before
+
+```text
+USER
+AD jsmith
+   │
+   └────► Entra jsmith
+           Synced ✅
+
+
+DEVICE
+COMP01
+├── AD Domain Joined ✅
+├── Intune Managed   ✅
+└── Entra Joined     ❌
+```
+
+## After
+
+```text
+USER
+AD jsmith
+   │
+   └────► Entra jsmith
+           Synced ✅
+
+
+DEVICE
+COMP01
+├── AD Domain Joined       ✅
+├── Microsoft Entra Joined ✅
+├── Hybrid Joined          ✅
+└── Intune Managed         ✅
+```
+
+Verified using:
+
+```text
+AzureAdJoined    : YES
+DomainJoined     : YES
+DeviceAuthStatus : SUCCESS
+```
+
+---
+
+# Next Steps
+
+Future lab work:
+
+- Verify `COMP01` information in the Microsoft Entra Admin Center
+- Test `ADEN\jsmith` Windows authentication
+- Review the user's UPN configuration
+- Understand AD UPN vs Microsoft Entra UPN
+- Troubleshoot user-targeted application deployment
+- Remove/replace the incorrectly selected third-party meeting application
+- Deploy an appropriate application package
+- Compare user-targeted and device-targeted application deployments
+- Practice additional Intune remote actions
+- Continue endpoint lifecycle troubleshooting
+
+---
+
+# Security / Documentation Notes
+
+Before publishing screenshots publicly:
+
+- Redact tenant IDs
+- Redact device IDs where appropriate
+- Never expose passwords
+- Never expose authentication tokens
+- Avoid publishing unnecessary account identifiers
+- Review screenshots for personal information
+
+Screenshots that demonstrate architecture or successful configuration can be useful portfolio evidence when sensitive identifiers are removed.
+
+---
+
+# Final Takeaway
+
+The biggest lesson from this lab was understanding that Microsoft endpoint management is composed of several connected but independent systems:
+
+```text
+Active Directory
+      │
+      ├── On-premises user identity
+      └── On-premises device identity
+              │
+              ▼
+Microsoft Entra Connect
+              │
+              ▼
+Microsoft Entra ID
+      │
+      ├── Cloud user identity
+      └── Cloud device identity
+              │
+              ▼
+Microsoft Intune
+      │
+      ├── Configuration
+      ├── Compliance
+      ├── Applications
+      └── Remote management
+```
+
+A device being visible and manageable in Intune does not automatically mean it is Microsoft Entra joined.
+
+Likewise, synchronizing a user into Microsoft Entra does not automatically synchronize or register the user's Windows computer.
+
+The final successful state for `COMP01` was:
+
+```text
+Active Directory Domain Joined     ✅
+Microsoft Entra Joined             ✅
+Hybrid Microsoft Entra Joined      ✅
+Microsoft Intune Managed           ✅
+Device Authentication Successful   ✅
+```
