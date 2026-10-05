@@ -1,15 +1,62 @@
-Environment: ADEN Corp
-Your role: IT Support Technician
-Queue: Internal IT
-Access: Standard IT administrative access to AD, Entra, Intune and endpoints
-Escalation: Senior Systems Administrator (me, only when requested)
-INC-001 — Can't log into workstation
-Priority: P3 — Normal
-Submitted: 11:47 AM
-User: Daniel Kim
-Department: Sales
-Location: Main Office
-User description:
-“Hey IT, I can't log into my computer anymore. It keeps saying my password is incorrect. 
-I'm pretty sure I'm using the right password because I logged in yesterday. Can someone reset it? 
-I have some work I need to finish this afternoon.”
+# INC-1001 — Windows Sign-In Failure
+
+## Ticket Information
+
+**Priority:** P3 - Normal  
+**Category:** Identity / Authentication  
+**Environment:** Hybrid Active Directory / Microsoft Entra ID  
+**Assigned Technician:** Aden  
+**Status:** In Progress
+
+## User Report
+
+> "Hi IT - I cannot get into my workstation today. It worked the
+> last time I used it. I need to get into my account to work.
+> Can you help?"
+
+## Environment
+
+- Windows Server 2022
+- Active Directory Domain Services
+- Microsoft Entra ID
+- Microsoft Entra Connect
+- Windows 11
+- PowerShell
+
+## Initial Triage
+
+_To be completed during investigation._
+
+## Investigation
+
+### User Communication
+
+_To be completed._
+
+### Technical Investigation
+
+_To be completed._
+
+## Root Cause
+
+_Do not complete until diagnosed._
+
+## Resolution
+
+_Do not complete until resolved._
+
+## Verification
+
+_Do not complete until service restoration is confirmed._
+
+## Resolution Notes
+
+_To be completed._
+
+## User-Facing Response
+
+_To be completed._
+
+## Lessons Learned
+
+_To be completed after incident closure._
