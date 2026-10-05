@@ -39,24 +39,67 @@ _To be completed._
 
 ## Root Cause
 
-_Do not complete until diagnosed._
+The user's Active Directory account had an expiration date of
+October 3, 2026. The incident occurred on October 5, meaning the
+account was no longer valid for authentication.
+
+The user remained an active employee, and authorization was obtained
+to remove the erroneous expiration date.
+
+## Investigation
+
+I initially identified that the account was inaccessible and restored
+access, but initially interpreted the issue as an account lockout.
+
+Further inspection of the user's AD account properties showed that the
+account had actually passed its configured expiration date.
+
+This distinction was important:
+
+- Locked account
+- Disabled account
+- Expired account
+- Expired password
+
+represent different account states and require different investigation
+and remediation.
 
 ## Resolution
 
-_Do not complete until resolved._
+Removed the erroneous account expiration from the user's authoritative
+on-premises Active Directory identity.
+
+Verified the account was:
+
+- Enabled
+- Not locked out
+- No longer configured with an expiration date
+
+Triggered an Entra Connect delta synchronization to propagate directory
+changes to Microsoft Entra ID.
+
+The user subsequently confirmed successful authentication.
 
 ## Verification
 
-_Do not complete until service restoration is confirmed._
-
-## Resolution Notes
-
-_To be completed._
-
-## User-Facing Response
-
-_To be completed._
+- Confirmed AD account state
+- Confirmed account expiration was removed
+- Successfully initiated Entra Connect delta synchronization
+- User confirmed successful workstation sign-in
 
 ## Lessons Learned
 
-_To be completed after incident closure._
+I initially focused on restoring service rather than fully identifying
+the root cause.
+
+Before modifying an expired employee account, I should verify that
+continued access is authorized because expiration may represent an
+intentional offboarding or contract-end control.
+
+I also learned that `gpupdate /force` is not relevant to an AD account
+expiration issue. The account property is managed in Active Directory,
+while Entra Connect synchronizes the hybrid identity to Entra.
+
+IT administrators should never request a user's password. Authentication
+verification should be performed by having the user enter their own
+credentials.
