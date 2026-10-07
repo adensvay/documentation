@@ -1,0 +1,49 @@
+# INC0042446 — Microsoft 365 Authentication Failure
+
+**Environment:** Windows Server 2022 / Active Directory / Microsoft 365  
+**User:** John Smith (`jsmith`)  
+**Department:** Sales  
+**Workstation:** `COMP01`  
+**Priority:** P3 — Normal  
+**Status:** Resolved
+
+---
+
+## Ticket Description
+
+User reported being able to sign into their Windows workstation normally but unable to access Microsoft 365 services.
+
+Affected services included:
+
+- Outlook on the web
+- Microsoft Teams
+
+The user reported receiving the following authentication error:
+
+> "Your account has been disabled. Please see your system administrator."
+
+---
+
+## Initial Triage
+
+Moved the incident from **New → Active**.
+
+Confirmed with the user that:
+
+- Windows authentication was working.
+- The issue affected Microsoft services.
+- Multiple Microsoft 365 applications were affected.
+- The user was receiving a consistent account-disabled error.
+
+Verified the user's identity using their employee ID before investigating the account.
+
+---
+
+## Investigation
+
+Because Windows itself was accessible but multiple Microsoft services were rejecting the user's identity, I investigated the user's Active Directory account.
+
+The account can be queried through PowerShell with:
+
+```powershell
+Get-ADUser -Identity jsmith -Properties *
