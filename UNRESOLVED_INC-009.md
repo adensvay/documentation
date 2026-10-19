@@ -1,5 +1,5 @@
 
-need to come back to this...
+** update 10/19/2026: gpt was able to successfully install on comp01 devices! Not sure what the fix was, but saw this today, its worth investigating last session..
 
 
 # Ticket #002 — Intune Application Deployment Failure
